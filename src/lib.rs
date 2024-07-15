@@ -8,7 +8,7 @@ fn prepend(text: &mut String, s: &str) {
 pub fn preprocess(text: &String) -> (String, String) {
     let mut header = String::new();
     let mut res = String::new();
-    let safe = Regex::new(r"#include <[\w\.]+>").unwrap();
+    let safe = Regex::new(r"#include <[^<>]+>").unwrap();
     let safe2 = Regex::new(r"#define [\w\.]+ [\w\.]+").unwrap();
     for l in text.lines() {
         if safe.is_match(l) {
@@ -36,9 +36,8 @@ pub fn prepend_macro(text: &mut String, mp: &HashMap<String, i32>) {
 }
 
 pub fn populate(text: &str, mp: &mut HashMap<String, i32>) {
-    mp.insert("<<".to_string(), 1);
     let re = Regex::new(r#"("[^"]*"|\w+)"#).unwrap();
-    let mut i: i32 = 2;
+    let mut i: i32 = 1;
     for l in text.lines() {
         for (_, [word]) in re.captures_iter(l).map(|c| c.extract()) {
             let tmp = word.to_string();

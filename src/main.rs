@@ -61,11 +61,19 @@ fn write_file(file: &mut fs::File, contents: &String) -> Result<()> {
 
 fn get_files(path: &Path) -> Vec<PathBuf> {
     let mut files = Vec::new();
-    if let Ok(entries) = fs::read_dir(path) {
+    if path.is_file() {
+        if let Some(ext) = path.extension() {
+            if ext == "c" || ext == "cpp" {
+                files.push(path.to_path_buf());
+            } else {
+                println!("Skipping file: {:?}", path);
+            }
+        }
+    } else if let Ok(entries) = fs::read_dir(path) {
         for entry in entries {
             if let Ok(entry) = entry {
                 let path = entry.path();
-                if entry.path().is_dir() {
+                if path.is_dir() {
                     let mut sub_files: Vec<PathBuf> = get_files(&path);
                     files.append(&mut sub_files);
                 } else {
@@ -80,5 +88,5 @@ fn get_files(path: &Path) -> Vec<PathBuf> {
             }
         }
     }
-    return files;
+    files
 }
