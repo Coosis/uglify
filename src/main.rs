@@ -7,7 +7,6 @@ use std::path::{Path, PathBuf};
 
 use uglify::populate;
 use uglify::replace;
-use uglify::prepend_macro;
 
 // uglify [path/file]
 fn main() {
@@ -39,7 +38,6 @@ fn process_file(file_path: &Path) -> Result<()> {
     let mut mp: HashMap<String, i32> = HashMap::new();
     populate(&contents, &mut mp);
     replace(&mut contents, &mp);
-    prepend_macro(&mut contents, &mp);
     println!("Read successful. Continue...");
 
     let mut file = fs::OpenOptions::new().write(true).truncate(true).open(file_path)?;

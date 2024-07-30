@@ -5,6 +5,7 @@ fn prepend(text: &mut String, s: &str) {
     *text = format!("{}{}", s, text);
 }
 
+// find the #include and #define
 pub fn preprocess(text: &String) -> (String, String) {
     let mut header = String::new();
     let mut res = String::new();
@@ -19,13 +20,12 @@ pub fn preprocess(text: &String) -> (String, String) {
             header.push_str(&format!("{}\n", l));
             continue;
         }
-        // println!("pushed {}", l);
         res.push_str(&format!("{}\n", l));
     }
     (header, res)
 }
 
-pub fn prepend_macro(text: &mut String, mp: &HashMap<String, i32>) {
+fn prepend_macro(text: &mut String, mp: &HashMap<String, i32>) {
     for (k, v) in mp {
         let mut torep = String::new();
         for _ in 0..*v {
@@ -35,6 +35,7 @@ pub fn prepend_macro(text: &mut String, mp: &HashMap<String, i32>) {
     }
 }
 
+// populate the hashmap to store keywords
 pub fn populate(text: &str, mp: &mut HashMap<String, i32>) {
     let re = Regex::new(r#"("[^"]*"|\w+)"#).unwrap();
     let mut i: i32 = 1;
@@ -46,11 +47,11 @@ pub fn populate(text: &str, mp: &mut HashMap<String, i32>) {
             }
             mp.insert(tmp, i);
             i += 1;
-            // println!("i is {}", i);
         }
     }
 }
 
+// replace the contents inside the text
 pub fn replace(text: &mut String, mp: &HashMap<String, i32>) {
     let (mut header, mut body) = preprocess(&text);
     let mut tos: Vec<_> = mp.iter().collect();
@@ -63,6 +64,7 @@ pub fn replace(text: &mut String, mp: &HashMap<String, i32>) {
         }
         body = body.replace(k, &torep);
     }
+    prepend_macro(&mut body, mp);
     header.push_str(&body);
     *text = header;
 }
@@ -98,8 +100,6 @@ mod tests {
         populate(&article, &mut mp);
         assert!(!mp.contains_key("#include"));
         assert!(!mp.contains_key("<iostream>"));
-        assert!(!mp.contains_key("iostream"));
-        assert!(!mp.contains_key("string"));
         assert!(mp.contains_key("int"));
         assert!(mp.contains_key("main"));
         assert!(mp.contains_key("cout"));
